@@ -18,7 +18,17 @@ def get_zillow17_data(use_cache=True):
             WHERE propertylandusedesc IN ('Single Family Residential')
             '''
     zillow17_data = pd.read_sql(query, url)
+    zillow17_data.drop(columns=['Unnamed: 0'], inplace=True)
     zillow17_data.to_csv(filename)
     return zillow17_data
 
-get_zillow17_data()
+
+# function to remove outliers
+def remove_outliers(df, k, col):
+    q1 = df[col].quantile(0.25)
+    q3 = df[col].quantile(0.75)
+    iqr = q3 - q1  # Interquartile range
+    fence_low = q1 - k * iqr
+    fence_high = q3 + k * iqr
+    df = df.loc[(df[col] > fence_low) & (df[col] < fence_high)]
+    return df
