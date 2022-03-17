@@ -12,9 +12,10 @@ def get_zillow17_data(use_cache=True):
     data = 'zillow'
     url = f'mysql+pymysql://{user}:{password}@{host}/{data}'
     query = '''
-            SELECT * 
+            SELECT bedroomcnt, bathroomcnt, calculatedfinishedsquarefeet, taxvaluedollarcnt, yearbuilt, taxamount, fips
             FROM properties_2017
-            JOIN propertylandusetype USING (propertylandusetypeid)
+            LEFT JOIN propertylandusetype USING (propertylandusetypeid)
+            WHERE propertylandusedesc IN ('Single Family Residential')
             '''
     zillow17_data = pd.read_sql(query, url)
     zillow17_data.to_csv(filename)
