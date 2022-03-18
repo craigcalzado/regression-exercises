@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 
+from sklearn.impute import SimpleImputer
+
 from env import host, user, password
 
 def get_zillow17_data(use_cache=True):
@@ -22,6 +24,19 @@ def get_zillow17_data(use_cache=True):
     return zillow17_data
 
 
+# prepare data
+def prep_zillow17(df):
+    imputer = SimpleImputer(strategy='median')
+    for col in df.columns:
+        if col not in ['fips', 'yearbuilt']:
+            df[col] = imputer.fit_transform(df[col].values.reshape(-1, 1))
+    df['fips'].fillna(df['fips'].median(), inplace=True)
+    df['yearbuilt'].fillna(df['yearbuilt'].median(), inplace=True)
+    df.drop('Unnamed: 0', axis=1, inplace=True)
+    return df
+
+
+
 # function to remove outliers
 def remove_outliers(df, k, col):
     q1 = df[col].quantile(0.25)
@@ -32,4 +47,8 @@ def remove_outliers(df, k, col):
     df = df.loc[(df[col] > fence_low) & (df[col] < fence_high)]
     return df
 
-    
+def remove_outliers_fibs(df, k):
+    for col in df.columns:
+        if col not in ['fips', 'yearbuilt']:
+            df = remove_outliers(df, k, col)
+    return df
