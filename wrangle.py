@@ -31,3 +31,5 @@ def remove_outliers(df, k, col):
     fence_high = q3 + k * iqr
     df = df.loc[(df[col] > fence_low) & (df[col] < fence_high)]
     return df
+
+    
