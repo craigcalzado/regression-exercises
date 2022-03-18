@@ -23,4 +23,6 @@ def get_zillow17_data(use_cache=True):
             '''
     zillow17_data = pd.read_sql(query, url)
     zillow17_data.to_csv(filename)
+    # rename columns
+    zillow17_data.rename(columns={'taxvaluedollarcnt': 'tax_value', 'taxamount': 'tax_amount', 'bedroomcnt': 'bedrooms', 'bathroomcnt': 'bathrooms', 'calculatedfinishedsquarefeet': 'finished_sqft', 'yearbuilt': 'year_built'}, inplace=True)
     return zillow17_data
