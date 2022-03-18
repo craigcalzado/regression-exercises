@@ -12,9 +12,11 @@ def prep_zillow17(df):
     for col in df.columns:
         if col not in ['fips', 'yearbuilt']:
             df[col] = imputer.fit_transform(df[col].values.reshape(-1, 1))
+    df.rename(columns={'taxvaluedollarcnt': 'tax_value', 'taxamount': 'tax_amount', 'bedroomcnt': 'bedrooms', 'bathroomcnt': 'bathrooms', 'calculatedfinishedsquarefeet': 'area', 'yearbuilt': 'year_built'}, inplace=True)
     df['fips'].fillna(df['fips'].median(), inplace=True)
-    df['yearbuilt'].fillna(df['yearbuilt'].median(), inplace=True)
-    df.drop('Unnamed: 0', axis=1, inplace=True)
+    df['year_built'].fillna(df['year_built'].median(), inplace=True)
+    if 'Unnamed: 0' in df.columns:
+        df.drop('Unnamed: 0', axis=1, inplace=True)
     return df
 
 
