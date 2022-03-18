@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 
 from sklearn.impute import SimpleImputer
@@ -41,4 +42,46 @@ def wrangle_grades():
     df = grades.dropna()
     # Convert all columns to int64 data types.
     df = df.astype("int")
+    return df
+# acquire data from csv file
+
+def get_telco_data(use_cache=True):
+    filename = "telco.csv"
+    if os.path.isfile(filename) and use_cache:
+        print("Let me get that for you...")
+        return pd.read_csv(filename)
+    print("Sorry, nothing on file, let me create one for you...")
+    data = 'telco_churn'
+    url = f'mysql+pymysql://{user}:{password}@{host}/{data}'
+    query = '''
+    SELECT * FROM customers 
+    JOIN contract_types USING (contract_type_id) 
+    JOIN payment_types USING (payment_type_id) 
+    JOIN internet_service_types USING (internet_service_type_id)
+    '''
+    df = pd.read_sql(query, url)
+    df = df.drop(['customer_id', 'contract_type_id', 'payment_type_id', 'internet_service_type_id'], axis=1)
+    if 'Unnamed: 0' in df.columns:
+        df = df.drop(['Unnamed: 0'], axis=1)
+    df.to_csv(filename)
+    return df
+
+def wrangle_telco():
+    '''
+    Function checks to see if telco_churn.csv already exists, if so it returns the dataframe,
+    if not it creates the dataframe and returns it.
+    '''
+    filename = "telco.csv"
+    if os.path.isfile(filename):
+        print("Let me get that for you...")
+        df = pd.read_csv(filename)
+    else:
+        df = get_telco_data()
+        df.to_csv(filename)
+    # replace blank values and special characters
+    df = df.replace(r"^\s*$", np.nan, regex=True)
+    # change total charges to float
+    df['total_charges'] = df['total_charges'].astype(float)
+    # fill missing values
+    df['total_charges'] = df['total_charges'].fillna(df['total_charges'].mean())
     return df
