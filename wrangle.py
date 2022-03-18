@@ -23,6 +23,22 @@ def get_zillow17_data(use_cache=True):
             '''
     zillow17_data = pd.read_sql(query, url)
     zillow17_data.to_csv(filename)
-    # rename columns
-    zillow17_data.rename(columns={'taxvaluedollarcnt': 'tax_value', 'taxamount': 'tax_amount', 'bedroomcnt': 'bedrooms', 'bathroomcnt': 'bathrooms', 'calculatedfinishedsquarefeet': 'finished_sqft', 'yearbuilt': 'year_built'}, inplace=True)
     return zillow17_data
+
+# fuction for lesson
+def wrangle_grades():
+    """
+    Read student_grades csv file into a pandas DataFrame,
+    drop student_id column, replace whitespaces with NaN values,
+    drop any rows with Null values, convert all columns to int64,
+    return cleaned student grades DataFrame.
+    """
+    # Acquire data from csv file.
+    grades = pd.read_csv("student_grades.csv")
+    # Replace white space values with NaN values.
+    grades = grades.replace(r"^\s*$", np.nan, regex=True)
+    # Drop all rows with NaN values.
+    df = grades.dropna()
+    # Convert all columns to int64 data types.
+    df = df.astype("int")
+    return df
