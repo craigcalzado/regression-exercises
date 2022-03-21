@@ -50,9 +50,10 @@ def get_telco_data(use_cache=True):
     if os.path.isfile(filename) and use_cache:
         print("Let me get that for you...")
         return pd.read_csv(filename)
-    print("Sorry, nothing on file, let me create one for you...")
-    data = 'telco_churn'
-    url = f'mysql+pymysql://{user}:{password}@{host}/{data}'
+    else:
+        print("Sorry, nothing on file, let me create one for you...")
+        data = 'telco_churn'
+        url = f'mysql+pymysql://{user}:{password}@{host}/{data}'
     query = '''
     SELECT * FROM customers 
     JOIN contract_types USING (contract_type_id) 
@@ -60,28 +61,35 @@ def get_telco_data(use_cache=True):
     JOIN internet_service_types USING (internet_service_type_id)
     '''
     df = pd.read_sql(query, url)
-    df = df.drop(['customer_id', 'contract_type_id', 'payment_type_id', 'internet_service_type_id'], axis=1)
-    if 'Unnamed: 0' in df.columns:
-        df = df.drop(['Unnamed: 0'], axis=1)
-    df.to_csv(filename)
     return df
+
 
 def wrangle_telco():
     '''
-    Function checks to see if telco_churn.csv already exists, if so it returns the dataframe,
+    Function checks to see if telco.csv already exists, if so it returns the dataframe,
     if not it creates the dataframe and returns it.
     '''
     filename = "telco.csv"
     if os.path.isfile(filename):
         print("Let me get that for you...")
-        df = pd.read_csv(filename)
+        return pd.read_csv(filename)
     else:
         df = get_telco_data()
-        df.to_csv(filename)
-    # replace blank values and special characters
+    df = df.to_csv(filename)
+    return df
+
+def prep_telco(df):
+    # create a new dataframe with only the columns we want
+    df = df[['customer_id', 'tenure', 'total_charges', 'monthly_charges']]
+     # replace blank values and special characters
     df = df.replace(r"^\s*$", np.nan, regex=True)
     # change total charges to float
     df['total_charges'] = df['total_charges'].astype(float)
     # fill missing values
     df['total_charges'] = df['total_charges'].fillna(df['total_charges'].mean())
     return df
+
+def split_dataframe(df):
+   train, test = train_test_split(df, test_size=0.2, random_state=789)
+   train, validate = train_test_split(train, test_size=0.3, random_state=789)
+   return train, validate, test 
