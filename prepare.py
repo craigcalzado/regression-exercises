@@ -42,3 +42,11 @@ def split_dataframe(df):
    train, test = train_test_split(df, test_size=0.2, random_state=789)
    train, validate = train_test_split(train, test_size=0.3, random_state=789)
    return train, validate, test 
+
+   # Telco prepare
+def prep_telco(df):
+    df = df.drop(columns=['Unnamed: 0', 'internet_service_type_id', 'payment_type_id', 'contract_type_id', 'multiple_lines'])
+    dummy_df = pd.get_dummies(df[['gender', 'payment_type', 'contract_type', 'internet_service_type']], drop_first=True)
+    df = pd.concat([df, dummy_df], axis=1)
+    return df.drop(columns=['gender', 'payment_type', 'contract_type', 'internet_service_type'])
+
