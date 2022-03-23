@@ -5,3 +5,4 @@ __pycache__
 *.csv
 *.xlsx
 scaling_lesson.ipynb
+modeling_lesson.ipynb
