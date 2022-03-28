@@ -93,3 +93,22 @@ def split_dataframe(df):
    train, test = train_test_split(df, test_size=0.2, random_state=789)
    train, validate = train_test_split(train, test_size=0.3, random_state=789)
    return train, validate, test 
+   
+   def get_zillow17_data(use_cache=True):
+    filename = "zillow.csv"
+    if os.path.isfile(filename) and use_cache:
+        print("Let me get that for you...")
+        return pd.read_csv(filename)
+    print("Sorry, nothing on file, let me create one for you...")
+    data = 'zillow'
+    url = f'mysql+pymysql://{user}:{password}@{host}/{data}'
+    query = '''
+            SELECT parcelid, bathroomcnt, bedroomcnt, calculatedbathnbr, finishedsquarefeet12, fips, garagecarcnt, latitude, longitude, lotsizesquarefeet, propertycountylandusecode, regionidcounty, yearbuilt, taxvaluedollarcnt, assessmentyear
+            FROM properties_2017 p
+            LEFT JOIN propertylandusetype USING (propertylandusetypeid)
+            LEFT JOIN predictions_2017 USING (parcelid)
+            WHERE propertylandusedesc IN ('Single Family Residential');
+            '''
+    zillow17_data = pd.read_sql(query, url)
+    zillow17_data.to_csv(filename)
+    return zillow17_data
